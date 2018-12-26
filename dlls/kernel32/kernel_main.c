@@ -204,11 +204,13 @@ ULONGLONG WINAPI DECLSPEC_HOTPATCH GetTickCount64(void)
  *
  * NOTES
  *  The value returned will wrap around every 2^32 milliseconds.
+ *  Must not change ECX, hence defined as asm function.
  */
-DWORD WINAPI DECLSPEC_HOTPATCH GetTickCount(void)
-{
-    return GetTickCount64();
-}
+__ASM_STDCALL_FUNC( GetTickCount, 0,
+                         "pushl %ecx\n\t"
+                         "call " __ASM_NAME("GetTickCount64") __ASM_STDCALL(0) "\n\t"
+                         "popl %ecx\n\t"
+                         "ret" )
 
 /******************************************************************************
  *           GetSystemRegistryQuota       (KERNEL32.@)
